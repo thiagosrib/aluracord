@@ -1,35 +1,7 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import { Box, Button, Text, TextField, Image } from '@skynexui/components';
 import appConfig from '../config.json';
-
-function GlobalStyle() {
-  return (
-    <style global jsx>{`
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        list-style: none;
-      }
-      body {
-        font-family: 'Open Sans', sans-serif;
-      }
-      /* App fit Height */ 
-      html, body, #__next {
-        min-height: 100vh;
-        display: flex;
-        flex: 1;
-      }
-      #__next {
-        flex: 1;
-      }
-      #__next > * {
-        flex: 1;
-      }
-      /* ./App fit Height */ 
-    `}</style>
-  );
-}
 
 function Titulo(props) {
   const Tag = props.tag || 'h1';
@@ -62,16 +34,16 @@ function Titulo(props) {
 // export default HomePage
 
 export default function PaginaInicial() {
-  // const [username, setUsername] = useState('peas');
-  const username = 'thiagosrib';
+  const [username, setUsername] = useState('thiagosrib');
+  const router = useRouter();
+  // const username = 'thiagosrib';
 
-  const handleSetUsername = (data) => {
-    console.log(data);
+  const handleSetUsername = (event) => {
+    setUsername(event.target.value);
   }
 
   return (
     <>
-      <GlobalStyle />
       <Box
         styleSheet={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -102,6 +74,10 @@ export default function PaginaInicial() {
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               width: { xs: '100%', sm: '50%' }, textAlign: 'center', marginBottom: '32px',
             }}
+            onSubmit={(event) => {
+              event.preventDefault();
+              router.push('chat');
+            }}
           >
             <Titulo tag="h2">Boas vindas de volta!</Titulo>
             <Text variant="body3" styleSheet={{ marginBottom: '32px', color: appConfig.theme.colors.neutrals[300] }}>
@@ -118,6 +94,7 @@ export default function PaginaInicial() {
                   backgroundColor: appConfig.theme.colors.neutrals[800],
                 },
               }}
+              onChange={handleSetUsername}
             />
             <Button
               type='submit'
@@ -129,7 +106,6 @@ export default function PaginaInicial() {
                 mainColorLight: appConfig.theme.colors.primary[400],
                 mainColorStrong: appConfig.theme.colors.primary[600],
               }}
-              onClick={handleSetUsername}
             />
           </Box>
           {/* Formulário */}
