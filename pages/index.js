@@ -34,7 +34,7 @@ function Titulo(props) {
 // export default HomePage
 
 export default function PaginaInicial() {
-  const [username, setUsername] = useState('thiagosrib');
+  const [username, setUsername] = useState('');
   const router = useRouter();
   // const username = 'thiagosrib';
 
@@ -132,7 +132,7 @@ export default function PaginaInicial() {
                 borderRadius: '50%',
                 marginBottom: '16px',
               }}
-              src={`https://github.com/${username}.png`}
+              src={username.length > 2 ? `https://github.com/${username}.png` : ''}
             />
             <Text
               variant="body4"
