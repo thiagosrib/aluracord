@@ -1,7 +1,10 @@
 import { Box, Text, TextField, Image, Button } from '@skynexui/components';
 import React, { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { createClient } from '@supabase/supabase-js'
 import appConfig from '../config.json';
+
+import { ButtonSendSticker } from '../src/components/ButtonSendSticker';
 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzMzNTI5NywiZXhwIjoxOTU4OTExMjk3fQ.Gi9xtZBUPet9B8wF_E07ngZECkoxQZp8-pHvuU-V2Cc';
 
@@ -13,9 +16,21 @@ supabaseClient
   .from('mensagens')
   .select('*')
 
+function listenerRealMessages(addNewMessage) {
+  return supabaseClient
+    .from('mensagens')
+    .on('INSERT', (response) => {
+      addNewMessage(response.new);
+    })
+    .subscribe();
+}
+
 export default function ChatPage() {
   const [mensagem, setMensagem] = useState('');
   const [mensagens, setMensagens] = useState([]);
+
+  const router = useRouter();
+  const loggedUser = router.query.username;
 
   useEffect(() => {
     supabaseClient
@@ -23,24 +38,28 @@ export default function ChatPage() {
       .select('*')
       .order('id', { ascending: false })
       .then(({ data }) => {
-        console.log('datas', data);
         setMensagens(data);
       });
+
+    listenerRealMessages((newMessage) => {
+      setMensagens((mensagens) => ([
+        newMessage,
+        ...mensagens
+      ]));
+    });
   }, [])
 
   const handleNewMessage = useCallback((message) => {
     const mensagem = {
       // id: mensagens.length + 1,
-      de: 'thiagosrib',
+      de: loggedUser,
       texto: message
     };
 
-    supabaseClient.from('mensagens').insert([mensagem]).then(({ data }) => {
-      setMensagens([
-        data[0],
-        ...mensagens
-      ]);
-    });
+    supabaseClient
+      .from('mensagens')
+      .insert([mensagem])
+      .then();
 
     setMensagem('');
   }, [mensagens]);
@@ -70,6 +89,7 @@ export default function ChatPage() {
         }}
       >
         <Header />
+
         <Box
           styleSheet={{
             position: 'relative',
@@ -82,7 +102,6 @@ export default function ChatPage() {
             padding: '16px',
           }}
         >
-
           <MessageList mensagens={mensagens} />
 
           <Box
@@ -100,6 +119,7 @@ export default function ChatPage() {
               onKeyPress={(event) => {
                 if (event.key === 'Enter') {
                   event.preventDefault();
+
                   handleNewMessage(mensagem);
                 }
               }}
@@ -116,6 +136,10 @@ export default function ChatPage() {
                 color: appConfig.theme.colors.neutrals[200],
               }}
             />
+
+            <ButtonSendSticker
+              onStickerClick={handleNewMessage}
+            />
           </Box>
         </Box>
       </Box>
@@ -130,6 +154,7 @@ function Header() {
         <Text variant='heading5'>
           Chat
         </Text>
+
         <Button
           variant='tertiary'
           colorVariant='neutral'
@@ -142,7 +167,6 @@ function Header() {
 }
 
 function MessageList(props) {
-  console.log('props', props.mensagens);
   return (
     <Box
       tag="ul"
@@ -183,9 +207,11 @@ function MessageList(props) {
               }}
               src={`https://github.com/${mensagem.de}.png`}
             />
+
             <Text tag="strong">
               {mensagem.de}
             </Text>
+
             <Text
               styleSheet={{
                 fontSize: '10px',
@@ -197,7 +223,18 @@ function MessageList(props) {
               {(new Date().toLocaleDateString())}
             </Text>
           </Box>
-          {mensagem.texto}
+
+          {mensagem.texto.startsWith(':sticker:')
+            ? <Image
+              styleSheet={{
+                width: '250px',
+                height: '250px',
+                display: 'inline-block',
+              }}
+              src={mensagem.texto.replace(':sticker: ', '')}
+            />
+            : mensagem.texto
+          }
         </Text>
       ))}
     </Box>

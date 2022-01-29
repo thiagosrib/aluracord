@@ -9,6 +9,7 @@ function Titulo(props) {
   return (
     <>
       <Tag>{props.children}</Tag>
+
       <style jsx>{`
             ${Tag} {
                 color: ${appConfig.theme.colors.neutrals['000']};
@@ -20,23 +21,9 @@ function Titulo(props) {
   );
 }
 
-// Componente React
-// function HomePage() {
-//     // JSX
-//     return (
-//         <div>
-//             <GlobalStyle />
-//             <Titulo tag="h2">Boas vindas de volta!</Titulo>
-//             <h2>Discord - Alura Matrix</h2>
-//         </div>
-//     )
-// }
-// export default HomePage
-
 export default function PaginaInicial() {
   const [username, setUsername] = useState('');
   const router = useRouter();
-  // const username = 'thiagosrib';
 
   const handleSetUsername = (event) => {
     setUsername(event.target.value);
@@ -76,10 +63,11 @@ export default function PaginaInicial() {
             }}
             onSubmit={(event) => {
               event.preventDefault();
-              router.push('chat');
+              router.push(`/chat?username=${username}`);
             }}
           >
             <Titulo tag="h2">Boas vindas de volta!</Titulo>
+
             <Text variant="body3" styleSheet={{ marginBottom: '32px', color: appConfig.theme.colors.neutrals[300] }}>
               {appConfig.name}
             </Text>
@@ -96,6 +84,7 @@ export default function PaginaInicial() {
               }}
               onChange={handleSetUsername}
             />
+
             <Button
               type='submit'
               label='Entrar'
@@ -109,7 +98,6 @@ export default function PaginaInicial() {
             />
           </Box>
           {/* Formulário */}
-
 
           {/* Photo Area */}
           <Box
@@ -134,6 +122,7 @@ export default function PaginaInicial() {
               }}
               src={username.length > 2 ? `https://github.com/${username}.png` : ''}
             />
+
             <Text
               variant="body4"
               styleSheet={{
